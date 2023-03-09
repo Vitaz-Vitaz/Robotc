@@ -17,11 +17,42 @@ float S2_calibr(){
 	return (est - minColor)/(maxColor - minColor) * 100;
 }
 
-void proehat_gradusi(float power, int gradusi){
-	float a = nMotorEncoder[motorB];
-	while(nMotorEncoder[motorB] - a < gradusi){
+void sredmotot_time(float power, float time){
+	float a = nSysTime;
+	while(nSysTime - a < time *  1000){
+		
+	 motor[motorA] = power;
+	}	
+
+}
+
+void nazad_do_linii(float power){
+		float l = S1_calibr();
+		float r = S2_calibr();
+		while(l > 20 || r > 20){
 		motor[motorB] = power;
 		motor[motorC] = power;
+		 l = S1_calibr();
+		 r = S2_calibr();
+		 displayBigTextLine(1, "%d", l);
+	}
+		
+}
+
+void proehat_gradusi(float power, int gradusi){
+	float a = nMotorEncoder[motorB];
+	if(power < 0){
+		while((abs(a) - abs(nMotorEncoder[motorB])) < gradusi){
+		motor[motorB] = power;
+		motor[motorC] = power;
+	      }
+	
+	}
+	else{
+	while(nMotorEncoder[motorB] - a < gradusi)  {
+		motor[motorB] = power;
+		motor[motorC] = power;
+     	}
 	}
 	motor[motorB] = 0;
 	motor[motorC] = 0;
@@ -29,27 +60,27 @@ void proehat_gradusi(float power, int gradusi){
 
 }
 
-void povernut_na90_gradusi(float power, int vpravo){
-	if (vpravo){
-				float a  = nMotorEncoder[motorC];
-				while(abs(nMotorEncoder[motorC]) - a < 245){
-				motor[motorB] = -power;
-				motor[motorC] = power;
-	        }
+void povernut_na90_gradusi(float power, int vlevo){
+	if (vlevo){
+		float a  = nMotorEncoder[motorC];
+		while(abs(nMotorEncoder[motorC]) - a < 265){
+			motor[motorB] = -power;
+			motor[motorC] = power;
+		}
 		motor[motorB] = 0;
 		motor[motorC] = 0;
 		sleep(1000);
 
 	}
 	else{float a  = nMotorEncoder[motorB];
-	while(abs(nMotorEncoder[motorB]) - a < 245){
-		motor[motorB] =  power;
-		motor[motorC] = -power;
-	};
+		while(abs(nMotorEncoder[motorB]) - a < 265){
+			motor[motorB] =  power;
+			motor[motorC] = -power;
+		};
 
-	motor[motorB] = 0;
-	motor[motorC] = 0;
-	sleep(1000);}
+		motor[motorB] = 0;
+		motor[motorC] = 0;
+		sleep(1000);}
 }
 
 
@@ -154,7 +185,10 @@ void go_line_doObject(float power, float mm){
 	float l = S1_calibr();
 	float r = S2_calibr();
 
-	while(SensorRaw[3] < mm){
+	while(True){
+		if(SensorRaw[S3] < mm){
+			break;
+		}
 		l = S1_calibr();
 		r = S2_calibr();
 		error = l - r;
@@ -165,7 +199,7 @@ void go_line_doObject(float power, float mm){
 		motor[motorC] = power - u;
 		last_error = error;
 	}
-	
-motor[motorB] = 0;
-		motor[motorC] = 0;
+
+	motor[motorB] = 0;
+	motor[motorC] = 0;
 }
